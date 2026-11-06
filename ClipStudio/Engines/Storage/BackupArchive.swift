@@ -133,7 +133,7 @@ enum BackupArchive {
 
     static func isSafe(_ path: String) -> Bool {
         guard !path.hasPrefix("/"), !path.contains("\\") else { return false }
-        let components = path.split(separator: "/")
+        let components = path.split(separator: "/", omittingEmptySubsequences: false)
         return !components.isEmpty && !components.contains(where: { $0 == ".." || $0 == "." || $0.isEmpty })
     }
 

@@ -117,7 +117,10 @@ final class CoreModelTests: XCTestCase {
     func testRectConversionToCoreImageSpace() {
         let rect = RectValue(x: 0.1, y: 0.2, width: 0.5, height: 0.5)
         let ci = rect.ciRect(in: CGRect(x: 0, y: 0, width: 100, height: 100))
-        XCTAssertEqual(ci, CGRect(x: 10, y: 30, width: 50, height: 50))
+        XCTAssertEqual(ci.origin.x, 10, accuracy: 1e-9)
+        XCTAssertEqual(ci.origin.y, 30, accuracy: 1e-9)
+        XCTAssertEqual(ci.width, 50, accuracy: 1e-9)
+        XCTAssertEqual(ci.height, 50, accuracy: 1e-9)
     }
 
     func testMergeTimelineOverlapsForTransitions() throws {
