@@ -1,0 +1,98 @@
+# =============================================================================
+# ClipStudio — XcodeGen project specification
+# CI runs `xcodegen generate` to create ClipStudio.xcodeproj (never committed).
+# =============================================================================
+
+name: ClipStudio
+
+options:
+  bundleIdPrefix: com.rashid
+  deploymentTarget:
+    iOS: "17.0"
+  developmentLanguage: ar
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    TARGETED_DEVICE_FAMILY: "1,2"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+    SWIFT_STRICT_CONCURRENCY: minimal
+    SUPPORTS_MACCATALYST: NO
+    ENABLE_PREVIEWS: NO
+
+targets:
+  ClipStudio:
+    type: application
+    platform: iOS
+    sources:
+      - path: ClipStudio
+        excludes:
+          - "Info.plist"
+          - "*.entitlements"
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rashid.clipstudio
+        PRODUCT_NAME: ClipStudio
+        INFOPLIST_FILE: ClipStudio/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: ClipStudio/ClipStudio.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        # Part 6: Apple Translation is used only on iOS 18+; weak-link it so iOS 17 still launches.
+        OTHER_LDFLAGS: ["$(inherited)", "-weak_framework", "Translation"]
+    dependencies:
+      - target: ClipStudioWidget
+        embed: true
+
+  ClipStudioWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: ClipStudioWidget
+        excludes:
+          - "Info.plist"
+          - "*.entitlements"
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rashid.clipstudio.widget
+        PRODUCT_NAME: ClipStudioWidget
+        INFOPLIST_FILE: ClipStudioWidget/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: ClipStudioWidget/ClipStudioWidget.entitlements
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+
+  ClipStudioTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ClipStudioTests
+    dependencies:
+      - target: ClipStudio
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rashid.clipstudio.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  ClipStudio:
+    build:
+      targets:
+        ClipStudio: all
+        ClipStudioTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - ClipStudioTests
+    archive:
+      config: Release
