@@ -250,7 +250,7 @@ final class StudioEngineTests: XCTestCase {
     }
 
     func testSnappingPrefersClosestEdge() {
-        let targets = [SnapTarget(time: 10, kind: .clipEdge)]
+        let targets = [SnapPoint(time: 10, kind: .clipEdge)]
         XCTAssertEqual(SnapEngine.snapRange(start: 9.9, duration: 2, to: targets, tolerance: 0.2).value, 10, accuracy: 1e-6)
         XCTAssertEqual(SnapEngine.snapRange(start: 7.95, duration: 2, to: targets, tolerance: 0.2).value, 8, accuracy: 1e-6)
         XCTAssertNil(SnapEngine.snap(5, to: targets, tolerance: 0.2).guide)
