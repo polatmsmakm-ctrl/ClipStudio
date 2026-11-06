@@ -255,9 +255,9 @@ final class StudioViewModel {
     let undo = UndoStack()
     let clipboard = StudioClipboard.shared
 
-    private(set) var project: EditProject
+    var project: EditProject
     /// Nested sequence being edited (nil = main timeline).
-    private(set) var editingCompoundID: UUID? = nil
+    var editingCompoundID: UUID? = nil
 
     // Selection & tools
     var selection: Set<UUID> = []

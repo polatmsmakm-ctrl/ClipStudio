@@ -22,8 +22,8 @@ final class PlayerController {
 
     private var rangeStart: Double?
     private var rangeEnd: Double?
-    private var timeObserver: Any?
-    private var endObserver: NSObjectProtocol?
+    nonisolated(unsafe) private var timeObserver: Any?
+    nonisolated(unsafe) private var endObserver: NSObjectProtocol?
 
     init() {
         player.actionAtItemEnd = .pause

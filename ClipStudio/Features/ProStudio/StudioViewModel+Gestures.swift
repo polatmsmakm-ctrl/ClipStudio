@@ -18,7 +18,7 @@ struct MoveDragState: Equatable {
     /// Display rows moved (positive = down).
     var rowDelta: Int
     var guide: Double?
-    let candidates: [SnapTarget]
+    let candidates: [SnapPoint]
 }
 
 struct TrimDragState: Equatable {
@@ -27,7 +27,7 @@ struct TrimDragState: Equatable {
     var original: Clip
     var preview: Clip
     var targetTime: Double
-    let candidates: [SnapTarget]
+    let candidates: [SnapPoint]
 }
 
 extension StudioViewModel {

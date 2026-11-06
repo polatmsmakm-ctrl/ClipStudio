@@ -145,7 +145,7 @@ extension SpeedMapping {
         var low = 0.0, high = duration
         for _ in 0..<40 {
             let mid = (low + high) / 2
-            guard let source = sourceTime(of: clip, local: mid) else { return nil }
+            guard let source = SpeedMapping.sourceTime(of: clip, local: mid) else { return nil }
             let before = clip.speed.isReversed ? source > sourceTime : source < sourceTime
             if before { low = mid } else { high = mid }
         }

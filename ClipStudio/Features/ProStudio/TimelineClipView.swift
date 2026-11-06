@@ -56,7 +56,37 @@ struct TimelineClipView: View {
         }
     }
 
+    private var clipOpacity: Double { clip.isEnabled ? (isDragSource ? 0.45 : 1) : 0.4 }
+    private var moveGestureMask: GestureMask { isSelected && !isLocked && vm.tool == .select && !showsAutomation ? .all : .subviews }
+    private var secondFrames: Int { Int(vm.frameRate.rounded()) }
+
     var body: some View {
+        framed
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(clip.name + "، " + Fmt.durationPrecise(clip.duration.seconds))
+            .accessibilityValue(AccessibilityPrefs.clipDescription(clip, trackKind: trackKind, locked: isLocked))
+            .accessibilityAddTraits(isSelected ? [.isSelected, .isButton] : .isButton)
+            .accessibilityAction(named: "تحديد") { vm.selection = [clip.id] }
+            .accessibilityAction(named: "تشغيل من هنا") { vm.seek(to: clip.start.seconds) }
+            .accessibilityAction(named: "قص عند رأس التشغيل") {
+                vm.selection = [clip.id]
+                vm.splitAtPlayhead()
+            }
+            .accessibilityAction(named: "تحريك ثانية للأمام") {
+                vm.selection = [clip.id]
+                vm.nudgeSelection(frames: secondFrames)
+            }
+            .accessibilityAction(named: "تحريك ثانية للخلف") {
+                vm.selection = [clip.id]
+                vm.nudgeSelection(frames: -secondFrames)
+            }
+            .accessibilityAction(named: "حذف") {
+                vm.selection = [clip.id]
+                vm.deleteSelection()
+            }
+    }
+
+    private var framed: some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 6, style: .continuous).fill(baseColor)
             content
@@ -81,7 +111,7 @@ struct TimelineClipView: View {
             if isSelected && endVisible && !isLocked { trimHandle(.end) }
         }
         .overlay(alignment: .leading) { transitionBadge }
-        .opacity(clip.isEnabled ? (isDragSource ? 0.45 : 1) : 0.4)
+        .opacity(clipOpacity)
         .contentShape(Rectangle())
         .gesture(
             SpatialTapGesture().onEnded { value in
@@ -90,31 +120,9 @@ struct TimelineClipView: View {
             }
         )
         .simultaneousGesture(TapGesture(count: 2).onEnded { doubleTap() })
-        .highPriorityGesture(moveGesture, including: isSelected && !isLocked && vm.tool == .select && !showsAutomation ? .all : .subviews)
+        .highPriorityGesture(moveGesture, including: moveGestureMask)
         .contextMenu { contextMenuItems } preview: { ClipPreviewCard(vm: vm, clip: clip, trackKind: trackKind) }
         .offset(x: visibleX0)
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(clip.name + "، " + Fmt.durationPrecise(clip.duration.seconds))
-        .accessibilityValue(AccessibilityPrefs.clipDescription(clip, trackKind: trackKind, locked: isLocked))
-        .accessibilityAddTraits(isSelected ? [.isSelected, .isButton] : .isButton)
-        .accessibilityAction(named: "تحديد") { vm.selection = [clip.id] }
-        .accessibilityAction(named: "تشغيل من هنا") { vm.seek(to: clip.start.seconds) }
-        .accessibilityAction(named: "قص عند رأس التشغيل") {
-            vm.selection = [clip.id]
-            vm.splitAtPlayhead()
-        }
-        .accessibilityAction(named: "تحريك ثانية للأمام") {
-            vm.selection = [clip.id]
-            vm.nudgeSelection(frames: Int(vm.frameRate.rounded()))
-        }
-        .accessibilityAction(named: "تحريك ثانية للخلف") {
-            vm.selection = [clip.id]
-            vm.nudgeSelection(frames: -Int(vm.frameRate.rounded()))
-        }
-        .accessibilityAction(named: "حذف") {
-            vm.selection = [clip.id]
-            vm.deleteSelection()
-        }
     }
 
     // MARK: Content

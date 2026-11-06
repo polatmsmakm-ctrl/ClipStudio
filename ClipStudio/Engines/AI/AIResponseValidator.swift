@@ -251,7 +251,7 @@ enum AIResponseValidator {
                 let time = clampTime(t)
                 steps.append(AIPlanStep(operation: .split(time: time), summary: "قص عند " + self.time(time, frameRate: fps)))
             case "trim_clip":
-                guard let id = resolve([text(args, "clip") ?? ""]).first, let clip = context.clips.first(where: { $0.clipID == id }) else { continue }
+                guard let id = resolve([Self.text(args, "clip") ?? ""]).first, let clip = context.clips.first(where: { $0.clipID == id }) else { continue }
                 var start = number(args, "start").map(clampTime)
                 var end = number(args, "end").map(clampTime)
                 if let s = start, s <= clip.start + 0.001 { start = s < clip.start - 0.001 ? s : nil }
@@ -269,17 +269,17 @@ enum AIResponseValidator {
                 steps.append(AIPlanStep(operation: .delete(clips: ids, ripple: ripple),
                                         summary: "حذف " + ids.map(name).joined(separator: "، ") + (ripple ? " وسد الفراغ" : "")))
             case "move_clip":
-                guard let id = resolve([text(args, "clip") ?? ""]).first, let t = number(args, "time") else { continue }
+                guard let id = resolve([Self.text(args, "clip") ?? ""]).first, let t = number(args, "time") else { continue }
                 steps.append(AIPlanStep(operation: .move(clip: id, to: max(0, t)), summary: "نقل " + name(id) + " إلى " + self.time(max(0, t), frameRate: fps)))
             case "set_speed":
-                guard let id = resolve([text(args, "clip") ?? ""]).first, let rate = number(args, "rate"), rate > 0 else { continue }
+                guard let id = resolve([Self.text(args, "clip") ?? ""]).first, let rate = number(args, "rate"), rate > 0 else { continue }
                 let clamped = min(8, max(0.1, rate))
                 steps.append(AIPlanStep(operation: .speed(clip: id, rate: clamped), summary: "سرعة " + name(id) + " ×" + Fmt.number(clamped, digits: 2)))
             case "add_title":
-                guard let value = text(args, "text"), !value.isEmpty else { continue }
+                guard let value = Self.text(args, "text"), !value.isEmpty else { continue }
                 let start = clampTime(number(args, "start") ?? context.playhead)
                 let length = min(30, max(0.5, number(args, "duration") ?? 3))
-                let placement = text(args, "placement").flatMap(TitlePlacement.init(rawValue:)) ?? .bottom
+                let placement = Self.text(args, "placement").flatMap(TitlePlacement.init(rawValue:)) ?? .bottom
                 steps.append(AIPlanStep(operation: .addTitle(text: String(value.prefix(200)), start: start, duration: length, placement: placement),
                                         summary: "عنوان «" + String(value.prefix(30)) + "» عند " + self.time(start, frameRate: fps)))
             case "add_transition":
@@ -289,7 +289,7 @@ enum AIResponseValidator {
                     ids = main.dropFirst().map(\.clipID)
                 }
                 guard !ids.isEmpty else { warnings.append("لا توجد قطعات لإضافة انتقال."); continue }
-                let kind = text(args, "kind").flatMap(TransitionKind.init(rawValue:)) ?? context.preferredTransition ?? .crossDissolve
+                let kind = Self.text(args, "kind").flatMap(TransitionKind.init(rawValue:)) ?? context.preferredTransition ?? .crossDissolve
                 let length = min(2, max(0.1, number(args, "duration") ?? 0.5))
                 steps.append(AIPlanStep(operation: .transition(clips: ids, kind: kind == .none ? .crossDissolve : kind, duration: length),
                                         summary: "انتقال «" + kind.title + "» (" + Fmt.int(ids.count) + ")"))
@@ -309,11 +309,11 @@ enum AIResponseValidator {
                                         summary: "تعديل الألوان لـ " + Fmt.int(ids.count) + " لقطة"))
             case "add_marker":
                 guard let t = number(args, "time") else { continue }
-                let label = text(args, "name").flatMap { $0.isEmpty ? nil : $0 } ?? "علامة"
+                let label = Self.text(args, "name").flatMap { $0.isEmpty ? nil : $0 } ?? "علامة"
                 steps.append(AIPlanStep(operation: .marker(time: clampTime(t), name: String(label.prefix(40))),
                                         summary: "علامة «" + String(label.prefix(20)) + "» عند " + self.time(clampTime(t), frameRate: fps)))
             case "apply_style":
-                guard let wanted = text(args, "name"),
+                guard let wanted = Self.text(args, "name"),
                       let style = styles.first(where: { $0.name == wanted }) ?? styles.first(where: { $0.name.localizedCaseInsensitiveContains(wanted) }) else {
                     warnings.append("الأسلوب المطلوب غير موجود.")
                     continue
@@ -327,14 +327,14 @@ enum AIResponseValidator {
             case "duck_music":
                 steps.append(AIPlanStep(operation: .duckMusic, summary: "خفض الموسيقى عند الكلام"))
             case "stabilize":
-                guard let id = resolve([text(args, "clip") ?? ""]).first else { continue }
+                guard let id = resolve([Self.text(args, "clip") ?? ""]).first else { continue }
                 steps.append(AIPlanStep(operation: .stabilize(clip: id), summary: "تثبيت " + name(id)))
             case "cut_to_beat":
                 let wanted = Int(number(args, "beats") ?? 2)
                 let beats = [1, 2, 4, 8].min { abs($0 - wanted) < abs($1 - wanted) } ?? 2
                 steps.append(AIPlanStep(operation: .cutToBeat(beats: beats), summary: "قص على الإيقاع كل " + Fmt.int(beats) + " ضربات"))
             case "open_tool":
-                guard let tool = text(args, "tool").flatMap(AssistantTool.init(rawValue:)) else { continue }
+                guard let tool = Self.text(args, "tool").flatMap(AssistantTool.init(rawValue:)) else { continue }
                 steps.append(AIPlanStep(operation: .openTool(tool), summary: "فتح أداة: " + tool.title))
             default:
                 warnings.append("أمر غير معروف: " + call.name)

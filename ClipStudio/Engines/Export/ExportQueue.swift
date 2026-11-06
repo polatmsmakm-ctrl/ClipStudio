@@ -303,7 +303,7 @@ final class ExportQueue {
             finish(id, status: .completed, outputFileName: finalURL.lastPathComponent, note: note)
         } catch is CancellationError {
             try? FileManager.default.removeItem(at: tempURL)
-            if let i = index(of: id), jobs[i].autoPaused || UIApplication.shared.applicationState == .background {
+            if let i = self.index(of: id), jobs[i].autoPaused || UIApplication.shared.applicationState == .background {
                 // Interrupted by the system — requeue to restart from the beginning.
                 jobs[i].status = .queued
                 jobs[i].progress = 0

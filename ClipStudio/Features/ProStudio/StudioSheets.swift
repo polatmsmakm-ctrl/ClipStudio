@@ -483,8 +483,7 @@ struct CompoundsSheet: View {
                                     StatusPill(text: "يحتاج تحديث", color: Theme.Palette.warning)
                                 }
                             }
-                            Text(Fmt.duration(compound.timeline.duration.seconds) + " • " + Fmt.int(compound.timeline.clipCount)
-                                 + " مقطع • " + Fmt.int(instances.count) + " نسخة في التسلسل")
+                            Text("\(Fmt.duration(compound.timeline.duration.seconds)) • \(Fmt.int(compound.timeline.clipCount)) مقطع • \(Fmt.int(instances.count)) نسخة في التسلسل")
                                 .font(.caption)
                                 .foregroundStyle(Theme.Palette.textSecondary)
                             HStack(spacing: 10) {
